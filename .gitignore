@@ -1,0 +1,6 @@
+.cache
+.tox
+feedem.egg-info
+
+*.pyc
+MANIFEST

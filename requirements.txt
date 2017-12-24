@@ -1,0 +1,10 @@
+click
+colorama
+flask
+flask-restful
+jinja2
+jsonschema
+Markdown
+mdv
+ruamel.yaml
+tabulate
