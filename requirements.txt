@@ -8,3 +8,4 @@ Markdown
 mdv
 ruamel.yaml
 tabulate
+unidecode

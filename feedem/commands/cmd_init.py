@@ -7,7 +7,7 @@ from ..db import DB
 from . import cli
 
 
-@cli.command(name='init')
+@cli.command(name='init', help='Initialize recipe and menu database.')
 @click.pass_context
 def cmd_init(ctx):
     if os.path.exists(ctx.obj.database_path):

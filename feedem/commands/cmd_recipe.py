@@ -2,7 +2,7 @@ import click
 import jinja2
 import mdv
 
-from .. import lower_unit
+from ..db import Recipe
 from . import cli
 
 
@@ -35,22 +35,33 @@ RECIPE_TEMPLATE = u"""
 ### Steps
 
 {% for step in RECIPE['steps'] %}
-  {{ loop.index }}. {{ '**({} minutes)**'.format(step['time']) if 'time' in step else '' }} {{ step['task'] }}
+  {{ loop.index }}. {{ '**({:2d} minutes)**'.format(step['time']) if 'time' in step else '' }} {{ step['task'] }}
 {% endfor %}
 """
 
 mdv.term_columns = click.get_terminal_size()[0]
 
 
-@cli.command(name='recipe')
-@click.option('--recipe-id', required=True)
+@cli.command(name='recipe', help='Display various aspects of a recipe.')
+@click.argument('recipe_name', required=False)
+@click.option('--recipe-id', default=None)
 @click.option('--action', default='show', type=click.Choice(['show']))
 @click.option('--scale', default=None)
 @click.pass_context
-def cmd_recipe(ctx, recipe_id, action, scale):
+def cmd_recipe(ctx, recipe_name, recipe_id, action, scale):
+    logger = ctx.obj.logger
+
+    if recipe_name is None and recipe_id is None:
+        logger.error('Either pass recipe name, or use --recipe-id option.')
+        return
+
     db = ctx.obj.open_database()
 
-    recipe = db.get_recipe(recipe_id)
+    recipe = Recipe.find(db, name=recipe_name, did=recipe_id)
+
+    if not recipe:
+        logger.error('No such recipe found.')
+        return
 
     # adjust scaling
     if scale is not None:
@@ -69,23 +80,7 @@ def cmd_recipe(ctx, recipe_id, action, scale):
             'kids': 0.0
         }
 
-    for ingredient in recipe['ingredients']:
-        if 'amount' not in ingredient:
-            continue
-
-        splitted = ingredient['amount'].split(' ')
-
-        amount = float(splitted[0])
-        unit = splitted[-1]
-
-        # scale amount
-        amount = amount / recipe['portions'] * scales['adults']
-
-        # lower units
-        unit, amount = lower_unit(unit, amount)
-
-        ingredient['amount'] = amount
-        ingredient['unit'] = unit
+    recipe.scale(scales)
 
     if action == 'show':
         recipe['.pre-formatted'] = {

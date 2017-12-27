@@ -70,15 +70,9 @@ def lower_unit(unit, amount):
         )
     )
 
-    logger = Logging.get_logger()
-
-    logger.debug('unit={}, amount={}'.format(unit, amount))
-
     for unit_sequence in unit_sequences:
         if not any([unit in step for step in unit_sequence]):
             continue
-
-        logger.debug('unit sequence {}'.format(unit_sequence))
 
         for i, (treshold, next_unit) in enumerate(unit_sequence):
             if next_unit != unit:
@@ -86,18 +80,13 @@ def lower_unit(unit, amount):
             break
 
         for treshold, next_unit in unit_sequence[i + 1:]:
-            logger.debug('step {}, {}'.format(treshold, next_unit))
-
             if amount < treshold:
-                logger.debug('lowered to {} {}'.format(amount, unit))
                 return unit, amount
 
             amount /= treshold
             unit = next_unit
 
-        logger.debug('lowered to {} {}'.format(amount, unit))
         return unit, amount
 
     else:
-        logger.debug('no unit sequence found')
         return unit, amount

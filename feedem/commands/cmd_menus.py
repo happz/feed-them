@@ -7,7 +7,7 @@ from ..db import Menu
 
 def menu_list_view(db, menu_ids, *filters):
     for menu_id in menu_ids:
-        menu = Menu.get(db, menu_id)
+        menu = Menu.get_document(db, menu_id)
 
         if filters and not any(fn(menu) for fn in filters):
             continue
@@ -15,7 +15,7 @@ def menu_list_view(db, menu_ids, *filters):
         yield menu_id, menu
 
 
-@cli.command(name='menus')
+@cli.command(name='menus', help='List menus.')
 @click.option('--tag', help='List only menus with this tag')
 @click.pass_context
 def cmd_menus(ctx, tag=None):

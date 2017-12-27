@@ -4,7 +4,7 @@ from . import cli, cmd_new_document
 from ..db import Menu
 
 
-@cli.command(name='new-menu')
+@cli.command(name='new-menu', help='Create a new menu.')
 @click.pass_context
 def cmd_new_menu(ctx):
     template = u"""---

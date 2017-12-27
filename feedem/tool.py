@@ -1,4 +1,5 @@
 from .commands import cli  # noqa
+from .commands.cmd_edit_menu import cmd_edit_menu  # noqa
 from .commands.cmd_edit_recipe import cmd_edit_recipe  # noqa
 from .commands.cmd_init import cmd_init  # noqa
 from .commands.cmd_menu import cmd_menu  # noqa

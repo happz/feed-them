@@ -4,7 +4,7 @@ from . import cli, cmd_new_document
 from ..db import Recipe
 
 
-@cli.command(name='new-recipe')
+@cli.command(name='new-recipe', help='Create a new recipe.')
 @click.pass_context
 def cmd_new_recipe(ctx):
     template = u"""---

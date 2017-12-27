@@ -64,10 +64,17 @@ def edit_yaml(text, validator):
         if validation_result is not True:
             logger.error('Recipe is not valid, {}'.format(validation_result))
 
+            click.clear()
+
             if click.confirm('Found errors. Y to re-edit, N to drop changes') is not True:
                 return None
 
             continue
+
+        click.clear()
+
+        if not click.confirm('Save changes?'):
+            return None
 
         with click.open_file(f.name, mode='r', encoding='utf-8') as f:
             return f.read()
