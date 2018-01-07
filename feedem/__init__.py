@@ -7,6 +7,8 @@ from .log import Logging, log_dict
 YAML = ruamel.yaml.YAML()
 YAML.indent(sequence=4, mapping=4, offset=2)
 
+UNITS = {}
+
 
 def normalize_path(path, fine_if_missing=False, logger=None):
     if not path:
@@ -54,39 +56,77 @@ def dump_yaml(data, path, logger=None):
         raise Exception("Unable to save YAML file '{}': {}".format(path, exc))
 
 
-def lower_unit(unit, amount):
-    unit_sequences = (
-        # weight
-        (
-            (None, 'g'),
-            (10.0, 'dkg'),
-            (100.0, 'kg')
-        ),
-        # volume
-        (
-            (None, 'ml'),
-            (100.0, 'dl'),
-            (10.0, 'l')
-        )
-    )
+class Unit(object):
+    def __init__(self, symbol):
+        self.symbol = symbol
 
-    for unit_sequence in unit_sequences:
-        if not any([unit in step for step in unit_sequence]):
-            continue
+        self.aliases = [symbol]
 
-        for i, (treshold, next_unit) in enumerate(unit_sequence):
-            if next_unit != unit:
-                continue
-            break
+        self.raising = None
+        self.lowering = None
 
-        for treshold, next_unit in unit_sequence[i + 1:]:
-            if amount < treshold:
-                return unit, amount
+    @property
+    def can_be_lowered(self):
+        return self.lowering is not None
 
-            amount /= treshold
-            unit = next_unit
+    @property
+    def can_be_raised(self):
+        return self.raising is not None
 
-        return unit, amount
+    def lower(self, amount):
+        assert self.can_be_lowered
 
-    else:
-        return unit, amount
+        lower_unit, k = self.lowering
+
+        return Amount(amount * k, lower_unit)
+
+    def raise_(self, amount):
+        assert self.can_be_raised
+
+        upper_unit, k = self.raising
+
+        return Amount(amount * k, upper_unit)
+
+
+class Amount(object):
+    def __init__(self, amount, unit):
+        self.amount = amount
+        self.unit = unit
+
+    @property
+    def can_be_lowered(self):
+        return self.unit.can_be_lowered
+
+    @property
+    def can_be_raised(self):
+        return self.unit.can_be_raised
+
+    def lower(self):
+        return self.unit.lower(self.amount)
+
+    def raise_(self):
+        return self.unit.raise_(self.amount)
+
+    def __repr__(self):
+        return '<{} {}>'.format(self.amount, self.unit.symbol)
+
+
+def load_units():
+    unit_defs = load_yaml('units.yml')
+
+    for symbol, properties in unit_defs.iteritems():
+        unit = Unit(symbol)
+
+        unit.aliases += properties.get('aliases', [])
+        unit.raising = properties.get('raise', None)
+        unit.lowering = properties.get('lower', None)
+
+        for alias in unit.aliases:
+            UNITS[alias] = unit
+
+    for symbol, unit in UNITS.iteritems():
+        if unit.raising is not None:
+            unit.raising = (UNITS[unit.raising['unit']], unit.raising['C'])
+
+        if unit.lowering is not None:
+            unit.lowering = (UNITS[unit.lowering['unit']], unit.lowering['C'])

@@ -1,0 +1,56 @@
+---
+
+# <unit symbol>:
+#   aliases:  # optional - list of unit aliases
+#   raise:    # optional
+#     unit:   # symbol of unit this one can be lowered to by multiplying the amount by C
+#     C:
+
+ks:
+  aliases:
+    - pcs
+    - kus
+    - kusy
+
+sp:
+  aliases:
+    - lžic
+    - lžíce
+
+g:
+  raise:
+    unit: dkg
+    C: 0.1
+
+dkg:
+  raise:
+    unit: kg
+    C: 0.01
+
+  lower:
+    unit: g
+    C: 10.0
+
+kg:
+  lower:
+    unit: dkg
+    C: 100.0
+
+ml:
+  raise:
+    unit: dcl
+    C: 0.01
+
+dcl:
+  lower:
+    unit: ml
+    C: 10.0
+
+  raise:
+    unit: l
+    C: 0.1
+
+l:
+  lower:
+    unit: dcl
+    C: 10.0

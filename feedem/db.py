@@ -7,7 +7,7 @@ import unidecode
 
 from . import normalize_path, dump_yaml, YAML
 from .log import Logging
-from . import lower_unit
+from . import Amount, UNITS
 
 
 class Document(object):
@@ -143,23 +143,21 @@ class Recipe(Document):
                 continue
 
             if isinstance(ingredient['amount'], int):
-                amount = float(ingredient['amount'])
-                unit = 'ks'
+                amount = Amount(float(ingredient['amount']), UNITS['pcs'])
 
             else:
                 splitted = ingredient['amount'].split(' ')
 
-                amount = float(splitted[0])
-                unit = splitted[-1]
+                amount = Amount(float(splitted[0]), UNITS[splitted[-1]])
 
                 # scale amount
-                amount = amount / self['portions'] * scales['adults']
+                amount.amount = amount.amount / self['portions'] * scales['adults']
 
-                # lower units
-                unit, amount = lower_unit(unit, amount)
+                # raise units
+                while amount.can_be_raised is True:
+                    amount = amount.raise_()
 
             ingredient['amount'] = amount
-            ingredient['unit'] = unit
 
     @classmethod
     def validate(cls, data):

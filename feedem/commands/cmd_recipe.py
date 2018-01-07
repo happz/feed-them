@@ -24,7 +24,7 @@ RECIPE_TEMPLATE = u"""
 
 {% for ingredient in RECIPE['ingredients'] %}
   {% if 'amount' in ingredient %}
-  * {{ ingredient['name'] }}, {{ ingredient['amount'] }} {{ ingredient['unit'] }}
+  * {{ ingredient['name'] }}, **{{ ingredient['amount'].amount }} {{ ingredient['amount'].unit.symbol }}**
   {% else %}
   * {{ ingredient['name'] }}
   {% endif %}

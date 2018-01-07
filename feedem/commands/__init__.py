@@ -5,7 +5,7 @@ import uuid
 
 import click
 
-from .. import normalize_path, load_yaml
+from .. import normalize_path, load_yaml, load_units
 from ..db import DB
 from ..log import Logging, ContextAdapter
 
@@ -34,6 +34,8 @@ def cli(ctx, database_path):
     obj.logger = ContextAdapter(obj.logger)
 
     obj.database_path = normalize_path(database_path, fine_if_missing=True)
+
+    load_units()
 
 
 def edit_yaml(text, validator):

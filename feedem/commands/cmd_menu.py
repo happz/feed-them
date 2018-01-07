@@ -58,7 +58,9 @@ SHOPPING_LIST_TEMPLATE = u"""
 #### {{ name }}
 
   {% for amount in amounts %}
-  * {{ amount[0] }} {{ amount[1] }}
+    {% if amount %}
+  * {{ amount.amount }} {{ amount.unit.symbol }}
+    {% endif %}
   {% endfor %}
 {% endfor %}
 """
@@ -113,9 +115,10 @@ def cmd_menu(ctx, menu_name, menu_id, action, scale):
 
                     for ingredient in recipe['ingredients']:
                         if 'amount' in ingredient:
-                            shopping_list[ingredient['name']].append((ingredient['amount'], ingredient['unit']))
+                            shopping_list[ingredient['name']].append(ingredient['amount'])
+
                         else:
-                            shopping_list[ingredient['name']].append(tuple())
+                            shopping_list[ingredient['name']].append(None)
 
         text = jinja2.Template(SHOPPING_LIST_TEMPLATE).render(MENU=menu, SHOPPING_LIST=shopping_list)
         formatted = mdv.main(text, theme='785.6556')
